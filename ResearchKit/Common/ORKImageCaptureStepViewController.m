@@ -206,12 +206,24 @@
 }
 
 - (void)handleError:(NSError *)error {
+    // Set the captured image data to nil before calling the delegate, as the call may result
+    // in an attempt to create a new result, which will in turn check the captured image data.
+    _capturedImageData = nil;
+    
+    // Shut everything down
+    [_captureSession stopRunning];
+    _captureSession = nil;
+    _stillImageOutput = nil;
+    _imageCaptureView.session = nil;
+    _imageCaptureView.capturedImage = nil;
+    
+    // Show the error in the image capture view
+    _imageCaptureView.error = error;
+    
     // Tell the task view controller that we have failed so that it removes our result
     STRONGTYPE(self.delegate) strongDelegate = self.delegate;
     [strongDelegate stepViewControllerDidFail:self withError:error];
     
-    // Show the error in the image capture view
-    _imageCaptureView.error = error;
 }
 
 - (void)setCapturedImageData:(NSData *)capturedImageData {
